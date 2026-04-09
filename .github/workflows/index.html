@@ -1,38 +1,931 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Web Builder Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0A0A0F;--bg2:#111118;--bg3:#1A1A25;--bg4:#222235;
+  --cd:#16161F;--cd2:#1E1E2E;
+  --t1:#F0F0FF;--t2:#9090B8;--t3:#555570;--t4:#333350;
+  --pr:#7C3AFF;--pr2:#9B5FFF;--prb:rgba(124,58,255,.12);--prg:rgba(124,58,255,.25);
+  --gn:#00D68F;--gnb:rgba(0,214,143,.1);
+  --bl:#0099FF;--blb:rgba(0,153,255,.1);
+  --rd:#FF3366;--rdb:rgba(255,51,102,.1);
+  --ye:#FFB800;--or:#FF6B00;
+  --bd:#222235;--bd2:#2E2E45;
+  --sh:0 2px 12px rgba(0,0,0,.4);
+  --sh2:0 8px 32px rgba(0,0,0,.5);
+  --sh3:0 20px 60px rgba(0,0,0,.7);
+  --r:10px;--r2:16px;--r3:22px;
+  --fH:"Plus Jakarta Sans",sans-serif;
+  --fC:"JetBrains Mono",monospace;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--fH);background:var(--bg);color:var(--t1);display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font-family:var(--fH);border:none;outline:none;cursor:pointer;background:none}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+::-webkit-scrollbar-track{background:transparent}
 
-# This workflow checks out code, builds an image, performs a container image
-# scan with Anchore's Syft tool, and uploads the results to the GitHub Dependency
-# submission API.
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes typing{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes slideIn{from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes gradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
 
-# For more information on the Anchore sbom-action usage
-# and parameters, see https://github.com/anchore/sbom-action. For more
-# information about the Anchore SBOM tool, Syft, see
-# https://github.com/anchore/syft
-name: Anchore Syft SBOM scan
+/* ── TOPBAR ── */
+.topbar{
+  display:flex;align-items:center;gap:12px;
+  padding:0 18px;height:54px;
+  background:var(--cd);border-bottom:1px solid var(--bd);
+  flex-shrink:0;position:relative;z-index:100;
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{
+  width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,var(--pr),var(--pr2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;box-shadow:0 4px 14px var(--prg);
+}
+.logo-name{font-size:17px;font-weight:900;letter-spacing:-.5px}
+.logo-name em{font-style:normal;
+  background:linear-gradient(90deg,var(--pr),#C084FC);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-badge{
+  padding:3px 9px;background:var(--prb);border:1px solid var(--prg);
+  border-radius:100px;font-size:10px;font-weight:700;color:var(--pr);
+}
+.topbar-center{flex:1;display:flex;align-items:center;justify-content:center;gap:6px}
+.template-pill{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 14px;background:var(--bg3);border:1px solid var(--bd);
+  border-radius:100px;font-size:12px;font-weight:600;color:var(--t2);
+  cursor:pointer;transition:.2s;
+}
+.template-pill:hover{border-color:var(--pr);color:var(--t1)}
+.template-pill.active{border-color:var(--pr);background:var(--prb);color:var(--pr)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.tb-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:var(--r);
+  font-size:12px;font-weight:700;transition:.2s;
+}
+.tb-btn-ghost{background:var(--bg3);border:1px solid var(--bd);color:var(--t2)}
+.tb-btn-ghost:hover{border-color:var(--pr);color:var(--t1)}
+.tb-btn-primary{background:linear-gradient(135deg,var(--pr),var(--pr2));color:#fff;box-shadow:0 4px 14px var(--prg)}
+.tb-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px var(--prg)}
+.tb-btn-green{background:linear-gradient(135deg,#00AA66,var(--gn));color:#fff;box-shadow:0 4px 14px rgba(0,214,143,.25)}
+.tb-btn-green:hover{transform:translateY(-1px)}
 
-on:
-  push:
-    branches: [ "main" ]
+/* ── MAIN LAYOUT ── */
+.main{display:flex;flex:1;overflow:hidden}
 
-permissions:
-  contents: write
+/* ── SIDEBAR ── */
+.sidebar{
+  width:260px;flex-shrink:0;
+  background:var(--cd);border-right:1px solid var(--bd);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+@media(max-width:768px){.sidebar{display:none}}
+.sb-head{padding:14px 16px;border-bottom:1px solid var(--bd)}
+.sb-title{font-size:11px;font-weight:800;color:var(--t3);letter-spacing:.7px;text-transform:uppercase;margin-bottom:10px}
+.model-select{
+  width:100%;padding:9px 12px;
+  background:var(--bg3);border:1.5px solid var(--bd);
+  border-radius:var(--r);font-size:13px;color:var(--t1);
+  cursor:pointer;transition:.2s;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23555570' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;
+}
+.model-select:focus{border-color:var(--pr)}
+.model-select option{background:var(--bg3);color:var(--t1)}
 
-jobs:
-  Anchore-Build-Scan:
-    permissions:
-      contents: write # required to upload to the Dependency submission API
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout the code
-      uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag localbuild/testimage:latest
-    - name: Scan the image and upload dependency results
-      uses: anchore/sbom-action@bb716408e75840bbb01e839347cd213767269d4a
-      with:
-        image: "localbuild/testimage:latest"
-        artifact-name: image.spdx.json
-        dependency-snapshot: true
+.sb-section{padding:12px 16px;border-bottom:1px solid var(--bd)}
+.template-list{display:flex;flex-direction:column;gap:4px}
+.tmpl-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 11px;border-radius:var(--r);
+  cursor:pointer;transition:.2s;border:1.5px solid transparent;
+}
+.tmpl-item:hover{background:var(--bg3)}
+.tmpl-item.active{background:var(--prb);border-color:var(--prg)}
+.tmpl-ico{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;
+}
+.tmpl-nm{font-size:13px;font-weight:600;color:var(--t1)}
+.tmpl-sub{font-size:10px;color:var(--t3);margin-top:1px}
+.tmpl-item.active .tmpl-nm{color:var(--pr)}
+
+.sb-history{flex:1;overflow-y:auto;padding:12px 16px}
+.hist-item{
+  padding:10px 11px;border-radius:var(--r);
+  cursor:pointer;transition:.2s;margin-bottom:4px;
+  border:1px solid transparent;
+}
+.hist-item:hover{background:var(--bg3)}
+.hist-nm{font-size:12px;font-weight:600;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-time{font-size:10px;color:var(--t3);margin-top:2px}
+
+/* ── CHAT AREA ── */
+.chat-area{
+  flex:1;display:flex;flex-direction:column;overflow:hidden;
+  background:var(--bg);
+}
+.chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
+
+/* WELCOME */
+.welcome{
+  max-width:680px;margin:0 auto;text-align:center;
+  padding:40px 20px;animation:fadeUp .5s ease;
+}
+.welcome-icon{font-size:52px;margin-bottom:16px;display:block}
+.welcome-title{font-size:28px;font-weight:900;letter-spacing:-1px;margin-bottom:10px}
+.welcome-title em{font-style:normal;
+  background:linear-gradient(90deg,var(--pr),#C084FC,var(--bl));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-size:200%;animation:gradShift 3s ease infinite;
+}
+.welcome-sub{font-size:15px;color:var(--t2);line-height:1.65;margin-bottom:28px}
+.quick-btns{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:28px}
+.qbtn{
+  padding:9px 16px;background:var(--cd);border:1.5px solid var(--bd);
+  border-radius:100px;font-size:12px;font-weight:700;color:var(--t2);
+  transition:.2s;cursor:pointer;
+}
+.qbtn:hover{border-color:var(--pr);color:var(--t1);background:var(--prb)}
+.caps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:560px;margin:0 auto}
+@media(max-width:500px){.caps-grid{grid-template-columns:repeat(2,1fr)}}
+.cap-card{
+  background:var(--cd);border:1px solid var(--bd);border-radius:var(--r2);
+  padding:14px;text-align:left;cursor:pointer;transition:.2s;
+}
+.cap-card:hover{border-color:var(--pr);transform:translateY(-2px);box-shadow:var(--sh)}
+.cap-ico{font-size:22px;margin-bottom:8px}
+.cap-t{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:3px}
+.cap-s{font-size:11px;color:var(--t3);line-height:1.5}
+
+/* MESSAGES */
+.msg{display:flex;gap:11px;animation:fadeUp .3s ease;max-width:800px}
+.msg.user{flex-direction:row-reverse;margin-left:auto}
+.msg-av{
+  width:34px;height:34px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  margin-top:2px;
+}
+.msg-av-ai{background:linear-gradient(135deg,var(--pr),var(--pr2));box-shadow:0 4px 12px var(--prg)}
+.msg-av-user{background:linear-gradient(135deg,#0099FF,#00D4FF)}
+.msg-bubble{
+  padding:12px 16px;border-radius:var(--r2);
+  font-size:14px;line-height:1.65;max-width:calc(100% - 50px);
+}
+.msg-bubble-ai{background:var(--cd);border:1px solid var(--bd);color:var(--t1)}
+.msg-bubble-user{background:linear-gradient(135deg,var(--pr),var(--pr2));color:#fff}
+.msg-bubble p{margin-bottom:8px}
+.msg-bubble p:last-child{margin:0}
+.msg-bubble strong{color:var(--gn);font-weight:700}
+.msg-bubble code{font-family:var(--fC);font-size:12px;background:var(--bg3);padding:2px 6px;border-radius:5px;color:var(--ye)}
+.msg-bubble ul{padding-left:16px;margin:6px 0}
+.msg-bubble li{margin-bottom:4px;color:var(--t2)}
+.msg-actions{display:flex;gap:6px;margin-top:8px}
+.msg-act-btn{
+  padding:5px 12px;background:var(--bg3);border:1px solid var(--bd);
+  border-radius:100px;font-size:11px;font-weight:700;color:var(--t3);
+  transition:.2s;cursor:pointer;
+}
+.msg-act-btn:hover{border-color:var(--pr);color:var(--pr)}
+.msg-act-btn.primary{background:var(--prb);border-color:var(--prg);color:var(--pr)}
+
+/* CODE BLOCK */
+.code-block{
+  background:var(--bg);border:1px solid var(--bd);
+  border-radius:var(--r2);overflow:hidden;margin:10px 0;
+}
+.code-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px;background:var(--bg3);border-bottom:1px solid var(--bd);
+}
+.code-lang{font-size:11px;font-weight:700;color:var(--t3);font-family:var(--fC)}
+.code-actions{display:flex;gap:6px}
+.code-btn{
+  padding:4px 10px;background:var(--bg4);border:1px solid var(--bd);
+  border-radius:6px;font-size:10px;font-weight:700;color:var(--t3);
+  transition:.2s;cursor:pointer;
+}
+.code-btn:hover{border-color:var(--pr);color:var(--pr)}
+.code-content{padding:14px;font-family:var(--fC);font-size:12px;color:var(--t2);line-height:1.7;overflow-x:auto;white-space:pre;max-height:300px;overflow-y:auto}
+.code-keyword{color:#C084FC}
+.code-string{color:#86EFAC}
+.code-comment{color:var(--t3)}
+.code-tag{color:#67E8F9}
+.code-attr{color:#FCA5A5}
+.code-val{color:#86EFAC}
+
+/* TYPING INDICATOR */
+.typing-msg{display:flex;gap:11px;align-items:flex-start;animation:fadeIn .3s ease}
+.typing-bubble{
+  padding:14px 18px;background:var(--cd);border:1px solid var(--bd);
+  border-radius:var(--r2);display:flex;align-items:center;gap:6px;
+}
+.typing-dot{width:7px;height:7px;border-radius:50%;background:var(--pr);animation:pulse 1.2s ease infinite}
+.typing-dot:nth-child(2){animation-delay:.2s}
+.typing-dot:nth-child(3){animation-delay:.4s}
+
+/* PREVIEW BADGE */
+.preview-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px;background:var(--gnb);border:1px solid rgba(0,214,143,.2);
+  border-radius:8px;font-size:11px;font-weight:700;color:var(--gn);
+  margin-top:8px;cursor:pointer;transition:.2s;
+}
+.preview-badge:hover{background:rgba(0,214,143,.15)}
+
+/* INPUT AREA */
+.input-area{
+  padding:14px 20px;background:var(--cd);border-top:1px solid var(--bd);
+  flex-shrink:0;
+}
+.input-row{
+  display:flex;align-items:flex-end;gap:10px;
+  background:var(--bg3);border:1.5px solid var(--bd);
+  border-radius:var(--r2);padding:10px 12px;
+  transition:.2s;
+}
+.input-row:focus-within{border-color:var(--pr);box-shadow:0 0 0 4px var(--prb)}
+.input-tools{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.itool{
+  width:30px;height:30px;border-radius:8px;
+  background:var(--bg4);display:flex;align-items:center;
+  justify-content:center;font-size:14px;transition:.2s;cursor:pointer;
+  border:1px solid var(--bd);
+}
+.itool:hover{border-color:var(--pr);background:var(--prb)}
+.msg-input{
+  flex:1;background:transparent;color:var(--t1);
+  font-size:14px;line-height:1.5;resize:none;
+  min-height:24px;max-height:120px;
+  font-family:var(--fH);
+}
+.msg-input::placeholder{color:var(--t3)}
+.send-btn{
+  width:38px;height:38px;border-radius:10px;
+  background:linear-gradient(135deg,var(--pr),var(--pr2));
+  color:#fff;font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  transition:.2s;flex-shrink:0;
+  box-shadow:0 4px 12px var(--prg);
+}
+.send-btn:hover{transform:scale(1.05);box-shadow:0 6px 18px var(--prg)}
+.send-btn:disabled{opacity:.4;transform:none;cursor:not-allowed}
+.input-meta{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding:0 4px}
+.input-hint{font-size:11px;color:var(--t4)}
+.input-hint span{color:var(--pr);font-weight:600}
+.char-count{font-size:11px;color:var(--t4)}
+
+/* PREVIEW PANEL */
+.preview-panel{
+  width:0;flex-shrink:0;background:var(--bg2);
+  border-left:1px solid var(--bd);
+  display:flex;flex-direction:column;overflow:hidden;
+  transition:width .35s cubic-bezier(.23,1,.32,1);
+}
+.preview-panel.open{width:50%}
+@media(max-width:900px){.preview-panel.open{width:100%;position:fixed;inset:0;z-index:200}}
+.preview-head{
+  display:flex;align-items:center;gap:10px;
+  padding:0 16px;height:44px;
+  background:var(--cd);border-bottom:1px solid var(--bd);
+  flex-shrink:0;
+}
+.preview-title{font-size:13px;font-weight:700;color:var(--t2);flex:1}
+.preview-url{
+  flex:1;padding:5px 10px;background:var(--bg3);border:1px solid var(--bd);
+  border-radius:7px;font-size:11px;color:var(--t3);font-family:var(--fC);
+}
+.prev-btn{
+  width:28px;height:28px;border-radius:7px;background:var(--bg3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:var(--t3);transition:.2s;cursor:pointer;
+  border:1px solid var(--bd);flex-shrink:0;
+}
+.prev-btn:hover{border-color:var(--pr);color:var(--pr)}
+.preview-frame{flex:1;border:none;background:#fff;width:100%}
+.preview-empty{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:12px;color:var(--t3);text-align:center;padding:20px;
+}
+.preview-empty-ico{font-size:42px;opacity:.3}
+
+/* TOAST */
+#toasts{position:fixed;bottom:24px;right:24px;z-index:1000;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--cd);color:var(--t1);border-radius:var(--r);box-shadow:var(--sh3);font-size:13px;font-weight:600;animation:fadeUp .3s ease;white-space:nowrap;border:1px solid var(--bd)}
+.toast.ok{border-color:rgba(0,214,143,.3);background:linear-gradient(135deg,rgba(0,60,30,.8),rgba(0,90,50,.8))}
+.toast.er{border-color:rgba(255,51,102,.3);background:linear-gradient(135deg,rgba(80,0,20,.8),rgba(120,0,30,.8))}
+
+/* MOBILE BOTTOM */
+@media(max-width:768px){
+  .topbar-center{display:none}
+  .logo-badge{display:none}
+  .topbar{padding:0 12px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">🤖</div>
+    <div class="logo-name">AI<em>Build</em></div>
+    <div class="logo-badge">AGENT</div>
+  </div>
+  <div class="topbar-center">
+    <div class="template-pill active" onclick="setTemplate('restaurant',this)">🍕 Restaurant</div>
+    <div class="template-pill" onclick="setTemplate('ecommerce',this)">🛒 E-Commerce</div>
+    <div class="template-pill" onclick="setTemplate('portfolio',this)">💼 Portfolio</div>
+    <div class="template-pill" onclick="setTemplate('saas',this)">⚡ SaaS</div>
+    <div class="template-pill" onclick="setTemplate('blog',this)">📝 Blog</div>
+    <div class="template-pill" onclick="setTemplate('landing',this)">🚀 Landing</div>
+  </div>
+  <div class="topbar-right">
+    <button class="tb-btn tb-btn-ghost" onclick="togglePreview()">👁 Preview</button>
+    <button class="tb-btn tb-btn-green" onclick="downloadCode()">⬇ Download</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-head">
+      <div class="sb-title">AI Model</div>
+      <select class="model-select" id="modelSelect" onchange="changeModel(this.value)">
+        <option value="claude-sonnet-4-20250514">Claude Sonnet 4 ⭐</option>
+        <option value="claude-opus-4-20250514">Claude Opus 4 (Smartest)</option>
+        <option value="claude-haiku-4-5-20251001">Claude Haiku (Fast)</option>
+      </select>
+    </div>
+    <div class="sb-section">
+      <div class="sb-title">Website Templates</div>
+      <div class="template-list">
+        <div class="tmpl-item active" onclick="setTmplSidebar('restaurant',this)">
+          <div class="tmpl-ico" style="background:rgba(255,107,0,.15)">🍕</div>
+          <div><div class="tmpl-nm">Restaurant App</div><div class="tmpl-sub">Zomato/Swiggy style</div></div>
+        </div>
+        <div class="tmpl-item" onclick="setTmplSidebar('ecommerce',this)">
+          <div class="tmpl-ico" style="background:rgba(0,153,255,.15)">🛒</div>
+          <div><div class="tmpl-nm">E-Commerce Store</div><div class="tmpl-sub">Amazon/Flipkart style</div></div>
+        </div>
+        <div class="tmpl-item" onclick="setTmplSidebar('delivery',this)">
+          <div class="tmpl-ico" style="background:rgba(255,48,8,.15)">⚡</div>
+          <div><div class="tmpl-nm">Delivery App</div><div class="tmpl-sub">Blinkit/Zepto style</div></div>
+        </div>
+        <div class="tmpl-item" onclick="setTmplSidebar('portfolio',this)">
+          <div class="tmpl-ico" style="background:rgba(124,58,255,.15)">💼</div>
+          <div><div class="tmpl-nm">Portfolio</div><div class="tmpl-sub">Developer/Designer</div></div>
+        </div>
+        <div class="tmpl-item" onclick="setTmplSidebar('saas',this)">
+          <div class="tmpl-ico" style="background:rgba(0,214,143,.15)">⚡</div>
+          <div><div class="tmpl-nm">SaaS Landing</div><div class="tmpl-sub">Startup website</div></div>
+        </div>
+        <div class="tmpl-item" onclick="setTmplSidebar('salon',this)">
+          <div class="tmpl-ico" style="background:rgba(236,72,153,.15)">💆</div>
+          <div><div class="tmpl-nm">Salon Booking</div><div class="tmpl-sub">Beauty & wellness</div></div>
+        </div>
+        <div class="tmpl-item" onclick="setTmplSidebar('hospital',this)">
+          <div class="tmpl-ico" style="background:rgba(255,51,102,.15)">🏥</div>
+          <div><div class="tmpl-nm">Hospital/Clinic</div><div class="tmpl-sub">Doctor appointment</div></div>
+        </div>
+        <div class="tmpl-item" onclick="setTmplSidebar('gym',this)">
+          <div class="tmpl-ico" style="background:rgba(255,184,0,.15)">🏋️</div>
+          <div><div class="tmpl-nm">Gym/Fitness</div><div class="tmpl-sub">Membership & classes</div></div>
+        </div>
+        <div class="tmpl-item" onclick="setTmplSidebar('realestate',this)">
+          <div class="tmpl-ico" style="background:rgba(0,153,255,.15)">🏠</div>
+          <div><div class="tmpl-nm">Real Estate</div><div class="tmpl-sub">Property listings</div></div>
+        </div>
+        <div class="tmpl-item" onclick="setTmplSidebar('custom',this)">
+          <div class="tmpl-ico" style="background:rgba(124,58,255,.15)">✨</div>
+          <div><div class="tmpl-nm">Custom Website</div><div class="tmpl-sub">Describe your idea</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sb-history">
+      <div class="sb-title">Recent Chats</div>
+      <div class="hist-item" onclick="loadHistory('Zomato Clone App')">
+        <div class="hist-nm">🍕 Zomato Clone App</div>
+        <div class="hist-time">2 hours ago</div>
+      </div>
+      <div class="hist-item" onclick="loadHistory('Blinkit Delivery App')">
+        <div class="hist-nm">⚡ Blinkit Delivery App</div>
+        <div class="hist-time">Yesterday</div>
+      </div>
+      <div class="hist-item" onclick="loadHistory('Developer Portfolio')">
+        <div class="hist-nm">💼 Developer Portfolio</div>
+        <div class="hist-time">2 days ago</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="chat-area">
+    <div class="chat-messages" id="chatMessages">
+      <!-- WELCOME -->
+      <div class="welcome" id="welcomeScreen">
+        <span class="welcome-icon">🤖</span>
+        <div class="welcome-title">AI <em>Web Builder</em> Agent</div>
+        <p class="welcome-sub">Main koi bhi website ka complete HTML/CSS/JS code bana sakta hoon.<br>Bata do kya banana hai — main instantly ready kar deta hoon!</p>
+        <div class="quick-btns">
+          <button class="qbtn" onclick="quickPrompt('Ek premium restaurant food ordering app banao jisme menu, cart aur payment ho')">🍕 Restaurant App</button>
+          <button class="qbtn" onclick="quickPrompt('Ek Blinkit jaisi 10 minute grocery delivery app banao')">⚡ Delivery App</button>
+          <button class="qbtn" onclick="quickPrompt('Ek modern developer portfolio website banao dark theme ke saath')">💼 Portfolio</button>
+          <button class="qbtn" onclick="quickPrompt('Ek SaaS startup landing page banao animations ke saath')">🚀 SaaS Landing</button>
+          <button class="qbtn" onclick="quickPrompt('Ek salon beauty booking app banao appointment scheduling ke saath')">💆 Salon Booking</button>
+          <button class="qbtn" onclick="quickPrompt('Ek Amazon jaisi e-commerce store banao search aur cart ke saath')">🛒 E-Commerce</button>
+          <button class="qbtn" onclick="quickPrompt('Ek gym fitness membership website banao class schedules ke saath')">🏋️ Gym Website</button>
+          <button class="qbtn" onclick="quickPrompt('Ek hospital clinic website banao doctor appointment booking ke saath')">🏥 Hospital App</button>
+        </div>
+        <div class="caps-grid">
+          <div class="cap-card" onclick="quickPrompt('Ek premium hotel booking website banao')">
+            <div class="cap-ico">🏨</div>
+            <div class="cap-t">Hotel Booking</div>
+            <div class="cap-s">Rooms, pricing, booking form</div>
+          </div>
+          <div class="cap-card" onclick="quickPrompt('Ek travel agency website banao packages aur tours ke saath')">
+            <div class="cap-ico">✈️</div>
+            <div class="cap-t">Travel Agency</div>
+            <div class="cap-s">Tours, packages, booking</div>
+          </div>
+          <div class="cap-card" onclick="quickPrompt('Ek real estate property listing website banao')">
+            <div class="cap-ico">🏠</div>
+            <div class="cap-t">Real Estate</div>
+            <div class="cap-s">Listings, filters, contact</div>
+          </div>
+          <div class="cap-card" onclick="quickPrompt('Ek online education platform banao courses aur videos ke saath')">
+            <div class="cap-ico">🎓</div>
+            <div class="cap-t">EdTech Platform</div>
+            <div class="cap-s">Courses, video, progress</div>
+          </div>
+          <div class="cap-card" onclick="quickPrompt('Ek car rental website banao booking aur fleet ke saath')">
+            <div class="cap-ico">🚗</div>
+            <div class="cap-t">Car Rental</div>
+            <div class="cap-s">Fleet, booking, pricing</div>
+          </div>
+          <div class="cap-card" onclick="quickPrompt('Ek news blog website banao categories aur articles ke saath')">
+            <div class="cap-ico">📰</div>
+            <div class="cap-t">News / Blog</div>
+            <div class="cap-s">Articles, categories, search</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INPUT -->
+    <div class="input-area">
+      <div class="input-row">
+        <div class="input-tools">
+          <div class="itool" onclick="attachFile()" title="Attach file">📎</div>
+          <div class="itool" onclick="clearChat()" title="New chat">✨</div>
+        </div>
+        <textarea class="msg-input" id="msgInput" placeholder="Koi bhi website describe karo... (e.g. 'Ek premium restaurant app banao jaise Zomato')" rows="1" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">→</button>
+      </div>
+      <div class="input-meta">
+        <div class="input-hint">Press <span>Enter</span> to send · <span>Shift+Enter</span> for new line</div>
+        <div class="char-count" id="charCount">0 / 2000</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREVIEW PANEL -->
+  <div class="preview-panel" id="previewPanel">
+    <div class="preview-head">
+      <div class="prev-btn" onclick="togglePreview()" title="Close">✕</div>
+      <input class="preview-url" id="previewUrl" value="preview://new-website" readonly>
+      <div class="prev-btn" onclick="refreshPreview()" title="Refresh">↺</div>
+      <div class="prev-btn" onclick="openFullscreen()" title="Fullscreen">⛶</div>
+    </div>
+    <div id="previewContent">
+      <div class="preview-empty">
+        <div class="preview-empty-ico">🖥️</div>
+        <div style="font-size:14px;font-weight:700;color:var(--t2)">Preview will appear here</div>
+        <div style="font-size:12px;color:var(--t3);margin-top:4px">Generate a website to see live preview</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+/* ══ STATE ══ */
+let messages = [];
+let currentCode = '';
+let currentTemplate = 'restaurant';
+let currentModel = 'claude-sonnet-4-20250514';
+let isGenerating = false;
+let previewOpen = false;
+
+/* ══ SYSTEM PROMPT ══ */
+const SYSTEM_PROMPT = `You are an expert AI web developer agent. You build COMPLETE, PRODUCTION-READY websites in a SINGLE HTML file.
+
+RULES:
+1. Always generate COMPLETE HTML file with all CSS and JS included
+2. Use beautiful modern design - dark themes, gradients, animations
+3. Make it MOBILE FIRST - responsive design
+4. Include ALL features the user asks for
+5. Use Google Fonts (Plus Jakarta Sans, Sora, etc.)
+6. Use real Unsplash image URLs for images
+7. Make it INTERACTIVE - working buttons, forms, modals
+8. Code must be 100% working - no placeholders
+9. Reply ONLY with the HTML code wrapped in \`\`\`html ... \`\`\`
+10. After the code, add a brief summary of what was built
+
+WEBSITE TEMPLATES YOU CAN BUILD:
+- Restaurant/Food Ordering (Zomato/Swiggy clone)
+- Grocery Delivery (Blinkit/Zepto clone)  
+- E-Commerce Store (Amazon/Flipkart clone)
+- Portfolio Website (Developer/Designer)
+- SaaS Landing Page (Startup)
+- Salon/Beauty Booking
+- Hospital/Clinic Website
+- Gym/Fitness Website
+- Real Estate Listings
+- Hotel Booking
+- Travel Agency
+- Education Platform
+- Car Rental
+- News/Blog
+- Any custom website
+
+DESIGN STANDARDS:
+- Use CSS variables for theming
+- Dark/Light mode toggle
+- Smooth animations (fadeUp, slideIn, etc.)
+- Premium typography (Google Fonts)
+- Real product images from Unsplash
+- Working cart/booking/contact forms
+- Mobile bottom navigation
+- Toast notifications
+- Loading states`;
+
+/* ══ FUNCTIONS ══ */
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  document.getElementById('charCount').textContent = el.value.length + ' / 2000';
+}
+
+function handleKey(e) {
+  if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+async function sendMessage() {
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim();
+  if(!text || isGenerating) return;
+  
+  document.getElementById('welcomeScreen')?.remove();
+  
+  // Add user message
+  addMessage('user', text);
+  messages.push({role:'user', content: text});
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('charCount').textContent = '0 / 2000';
+  
+  // Show typing
+  const typingId = showTyping();
+  isGenerating = true;
+  document.getElementById('sendBtn').disabled = true;
+  
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        model: currentModel,
+        max_tokens: 8000,
+        system: SYSTEM_PROMPT,
+        messages: messages
+      })
+    });
+    
+    const data = await response.json();
+    removeTyping(typingId);
+    
+    if(data.content && data.content[0]) {
+      const reply = data.content.map(c => c.text || '').join('');
+      messages.push({role:'assistant', content: reply});
+      
+      // Extract code and summary
+      const codeMatch = reply.match(/```html([\s\S]*?)```/);
+      const code = codeMatch ? codeMatch[1].trim() : '';
+      const summary = reply.replace(/```html[\s\S]*?```/g, '').trim();
+      
+      if(code) {
+        currentCode = code;
+        addMessageWithCode(summary, code);
+        // Auto open preview
+        openPreviewWithCode(code);
+        toast('✅ Website generated! Preview opened', 'ok');
+      } else {
+        addMessage('ai', reply);
+      }
+    } else if(data.error) {
+      removeTyping(typingId);
+      addMessage('ai', '❌ Error: ' + (data.error.message || 'API error. Check your connection.'));
+      toast('API Error: ' + (data.error.type || 'Unknown'), 'er');
+    }
+  } catch(err) {
+    removeTyping(typingId);
+    addMessage('ai', `⚠️ **Connection Error**
+
+API se connect nahi ho pa raha. Check karo:
+• Internet connection
+• API key valid hai
+
+Error: ${err.message}`);
+    toast('Connection failed', 'er');
+  }
+  
+  isGenerating = false;
+  document.getElementById('sendBtn').disabled = false;
+}
+
+function addMessage(role, text) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + (role === 'user' ? 'user' : '');
+  
+  const av = role === 'user' 
+    ? '<div class="msg-av msg-av-user">👤</div>'
+    : '<div class="msg-av msg-av-ai">🤖</div>';
+  
+  const formatted = text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`(.*?)`/g, '<code>$1</code>')
+    .replace(/
+/g, '<br>');
+  
+  div.innerHTML = role === 'user' 
+    ? `${av}<div class="msg-bubble msg-bubble-user">${formatted}</div>`
+    : `${av}<div class="msg-bubble msg-bubble-ai">${formatted}</div>`;
+  
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function addMessageWithCode(summary, code) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  
+  const lines = code.split('
+').slice(0,18).map(line => {
+    return line
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/(<!DOCTYPE|html|head|body|div|span|button|input|style|script)/g,'<span class="code-tag">$1</span>')
+      .replace(/(class|id|src|href|style|type|placeholder|onclick)=/g,'<span class="code-attr">$1</span>=')
+      .replace(/(".*?")/g,'<span class="code-val">$1</span>')
+      .replace(/(\/\*.*?\*\/|\/\/.*)/g,'<span class="code-comment">$1</span>');
+  }).join('
+');
+  
+  const summaryHtml = summary ? `<p>${summary.replace(/
+/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/`(.*?)`/g,'<code>$1</code>')}</p>` : '';
+  
+  div.innerHTML = `
+    <div class="msg-av msg-av-ai">🤖</div>
+    <div class="msg-bubble msg-bubble-ai" style="max-width:600px">
+      ${summaryHtml}
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">HTML · CSS · JavaScript</span>
+          <div class="code-actions">
+            <button class="code-btn" onclick="copyCode()">📋 Copy</button>
+            <button class="code-btn" onclick="downloadCode()">⬇ Download</button>
+          </div>
+        </div>
+        <div class="code-content">${lines}
+<span style="color:var(--t3)">... (${code.split('\n').length} lines total)</span></div>
+      </div>
+      <div class="preview-badge" onclick="togglePreview()">
+        👁 Live Preview Open karo
+      </div>
+      <div class="msg-actions">
+        <button class="msg-act-btn primary" onclick="downloadCode()">⬇ Download HTML</button>
+        <button class="msg-act-btn" onclick="addFollowup('Is website mein dark mode add karo')">+ Dark Mode</button>
+        <button class="msg-act-btn" onclick="addFollowup('Is website ko aur responsive banao mobile ke liye')">📱 Mobile Fix</button>
+        <button class="msg-act-btn" onclick="addFollowup('Is website ka design aur premium banao')">✨ Upgrade Design</button>
+      </div>
+    </div>`;
+  
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function showTyping() {
+  const container = document.getElementById('chatMessages');
+  const id = 'typing-' + Date.now();
+  const div = document.createElement('div');
+  div.className = 'typing-msg';
+  div.id = id;
+  div.innerHTML = `
+    <div class="msg-av msg-av-ai">🤖</div>
+    <div class="typing-bubble">
+      <span style="font-size:12px;color:var(--t3);margin-right:8px">Building your website</span>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return id;
+}
+
+function removeTyping(id) {
+  document.getElementById(id)?.remove();
+}
+
+function openPreviewWithCode(code) {
+  const panel = document.getElementById('previewPanel');
+  const content = document.getElementById('previewContent');
+  
+  if(!previewOpen) {
+    panel.classList.add('open');
+    previewOpen = true;
+  }
+  
+  const iframe = document.createElement('iframe');
+  iframe.className = 'preview-frame';
+  iframe.srcdoc = code;
+  iframe.sandbox = 'allow-scripts allow-same-origin';
+  
+  content.innerHTML = '';
+  content.appendChild(iframe);
+  document.getElementById('previewUrl').value = 'preview://generated-website.html';
+}
+
+function togglePreview() {
+  const panel = document.getElementById('previewPanel');
+  previewOpen = !previewOpen;
+  panel.classList.toggle('open', previewOpen);
+  if(previewOpen && currentCode) openPreviewWithCode(currentCode);
+}
+
+function refreshPreview() {
+  if(currentCode) openPreviewWithCode(currentCode);
+  toast('🔄 Preview refreshed');
+}
+
+function openFullscreen() {
+  if(!currentCode){toast('Pehle website generate karo','er');return;}
+  const w = window.open();
+  w.document.write(currentCode);
+  w.document.close();
+}
+
+function copyCode() {
+  if(!currentCode){toast('Koi code nahi hai','er');return;}
+  navigator.clipboard.writeText(currentCode).then(()=>toast('📋 Code copied!','ok'));
+}
+
+function downloadCode() {
+  if(!currentCode){toast('Pehle website generate karo','er');return;}
+  const blob = new Blob([currentCode], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'website-' + Date.now() + '.html';
+  a.click();
+  toast('⬇ Downloading...','ok');
+}
+
+function quickPrompt(text) {
+  document.getElementById('msgInput').value = text;
+  autoResize(document.getElementById('msgInput'));
+  sendMessage();
+}
+
+function addFollowup(text) {
+  document.getElementById('msgInput').value = text;
+  sendMessage();
+}
+
+function clearChat() {
+  messages = [];
+  currentCode = '';
+  const container = document.getElementById('chatMessages');
+  container.innerHTML = '';
+  
+  // Re-add welcome
+  const welcome = document.createElement('div');
+  welcome.id = 'welcomeScreen';
+  welcome.className = 'welcome';
+  welcome.innerHTML = `
+    <span class="welcome-icon">🤖</span>
+    <div class="welcome-title">AI <em>Web Builder</em> Agent</div>
+    <p class="welcome-sub">Naya chat shuru karo! Bata do kya banana hai.</p>
+    <div class="quick-btns">
+      <button class="qbtn" onclick="quickPrompt('Ek premium restaurant food ordering app banao')">🍕 Restaurant</button>
+      <button class="qbtn" onclick="quickPrompt('Ek Blinkit jaisi delivery app banao')">⚡ Delivery</button>
+      <button class="qbtn" onclick="quickPrompt('Ek modern portfolio website banao')">💼 Portfolio</button>
+      <button class="qbtn" onclick="quickPrompt('Ek SaaS landing page banao')">🚀 SaaS</button>
+    </div>`;
+  container.appendChild(welcome);
+  
+  const panel = document.getElementById('previewPanel');
+  panel.classList.remove('open');
+  previewOpen = false;
+  toast('✨ New chat started');
+}
+
+function setTemplate(name, btn) {
+  currentTemplate = name;
+  document.querySelectorAll('.template-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  
+  const prompts = {
+    restaurant: 'Ek premium restaurant food ordering app banao jaise Zomato - menu categories, food cards with images, cart, payment',
+    ecommerce: 'Ek premium e-commerce store banao jaise Amazon India - products, search, filters, cart, checkout',
+    portfolio: 'Ek modern dark theme developer portfolio website banao - projects, skills, contact form, animations',
+    saas: 'Ek SaaS startup landing page banao - hero, features, pricing, testimonials, CTA',
+    blog: 'Ek modern news blog website banao - articles, categories, search, dark mode',
+    landing: 'Ek premium product landing page banao with hero, features, pricing, FAQ sections'
+  };
+  
+  if(prompts[name]) {
+    document.getElementById('msgInput').value = prompts[name];
+    autoResize(document.getElementById('msgInput'));
+  }
+}
+
+function setTmplSidebar(name, item) {
+  currentTemplate = name;
+  document.querySelectorAll('.tmpl-item').forEach(i=>i.classList.remove('active'));
+  item.classList.add('active');
+  
+  const prompts = {
+    restaurant: 'Ek premium restaurant food ordering app banao Zomato jaisa - menu, cart, payment, order tracking',
+    ecommerce: 'Ek premium e-commerce store banao Amazon jaisa - products, search, cart, checkout',
+    delivery: 'Ek Blinkit jaisi 10-minute grocery delivery app banao - categories, products, cart, payment',
+    portfolio: 'Ek modern dark developer portfolio banao - hero, projects, skills, experience, contact',
+    saas: 'Ek SaaS startup landing page banao - hero, features, pricing table, testimonials',
+    salon: 'Ek premium salon beauty booking app banao - services, stylists, appointment booking, gallery',
+    hospital: 'Ek hospital website banao - departments, doctors, appointment booking, emergency',
+    gym: 'Ek gym fitness website banao - membership plans, class schedule, trainers, gallery',
+    realestate: 'Ek real estate website banao - property listings, filters, map view, contact agent',
+    custom: ''
+  };
+  
+  if(prompts[name]) {
+    document.getElementById('msgInput').value = prompts[name];
+    autoResize(document.getElementById('msgInput'));
+  }
+  document.getElementById('msgInput').focus();
+}
+
+function changeModel(val) {
+  currentModel = val;
+  toast('🤖 Model changed to ' + val.split('-')[1]);
+}
+
+function loadHistory(name) {
+  toast('📂 Loading: ' + name);
+  document.getElementById('msgInput').value = name + ' banana hai mujhe';
+  autoResize(document.getElementById('msgInput'));
+}
+
+function attachFile() {
+  toast('📎 File attach feature coming soon');
+}
+
+/* ══ TOAST ══ */
+function toast(msg, type='') {
+  const tc = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = 'toast' + (type?' '+type:'');
+  t.textContent = msg;
+  tc.appendChild(t);
+  setTimeout(()=>t.style.opacity='0', 2500);
+  setTimeout(()=>t.remove(), 3000);
+}
+
+/* ══ AUTO RESIZE INPUT ══ */
+document.getElementById('msgInput').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+</script>
+</body>
+</html>
